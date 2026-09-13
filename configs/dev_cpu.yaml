@@ -1,0 +1,23 @@
+name: dev_cpu
+model:
+  vocab_size: 50257
+  maxlen: 64
+  embed_dim: 64
+  num_heads: 4
+  num_layers: 2
+  mlp_ratio: 4.0
+  dropout: 0.0
+data:
+  source: local_file
+  file_path: TinyStories-1000.txt
+  max_stories: 50
+  val_fraction: 0.1
+train:
+  batch_size: 8
+  max_steps: 20
+  peak_lr: 3.0e-4
+  compute_dtype: float32
+  log_every: 5
+  eval_every: 10
+  ckpt_every: 10
+out_dir: runs

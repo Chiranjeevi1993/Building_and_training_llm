@@ -1,0 +1,61 @@
+name: Teardown
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type DESTROY to confirm'
+        required: true
+  schedule:
+    # Set this to ~4 hours before your Azure credits expire, then remove
+    # once teardown has actually run. Example below: adjust the date.
+    - cron: "0 20 * * *"
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+  ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+  ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+  ARM_USE_OIDC: "true"
+
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch'
+    steps:
+      - run: |
+          if [ "${{ inputs.confirm }}" != "DESTROY" ]; then
+            echo "Confirmation string did not match DESTROY — aborting."
+            exit 1
+          fi
+
+  export-and-destroy:
+    needs: [guard]
+    if: always() && (github.event_name == 'schedule' || needs.guard.result == 'success')
+    runs-on: ubuntu-latest
+    environment: prod
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -r requirements.txt huggingface_hub
+
+      - name: Export checkpoints to Hugging Face before destroying anything
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: python scripts/export_to_hf.py
+
+      - uses: hashicorp/setup-terraform@v3
+      - working-directory: infra
+        run: |
+          terraform init -backend-config="resource_group_name=${{ secrets.TFSTATE_RG }}" -backend-config="storage_account_name=${{ secrets.TFSTATE_SA }}" -backend-config="container_name=tfstate" -backend-config="key=minigpt.tfstate"
+          terraform destroy -auto-approve

@@ -1,12 +1,18 @@
+# CPU / serving requirements. See requirements-gpu.txt for CUDA training extras.
 jax==0.6.2
 jaxlib==0.6.2
 flax==0.10.7
-grain==0.2.13
-array-record<0.6.0
+optax==0.2.4
+orbax-checkpoint==0.11.0
 tiktoken==0.4.0
+numpy==2.2.6
+pyyaml==6.0.2
+fastapi==0.115.6
+uvicorn==0.34.0
 gradio==6.5.1
-orbax-checkpoint
 ipywidgets==8.1.8
 typing-extensions==4.15.0
 jupyter==1.1.1
 matplotlib==3.10.8
+pytest==8.3.4
+ruff==0.9.4

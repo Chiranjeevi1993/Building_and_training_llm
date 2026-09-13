@@ -1,0 +1,6 @@
+[tool.ruff]
+line-length = 110
+exclude = [".venv", ".venv-local", "notebooks", "runs"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]

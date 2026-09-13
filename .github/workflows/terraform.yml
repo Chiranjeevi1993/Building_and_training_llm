@@ -1,0 +1,67 @@
+name: Terraform
+
+on:
+  pull_request:
+    paths: ["infra/**"]
+  push:
+    branches: [main]
+    paths: ["infra/**"]
+
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
+
+env:
+  ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+  ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+  ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+  ARM_USE_OIDC: "true"
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: infra
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+      - run: terraform fmt -check -recursive
+      - run: terraform init -backend-config="resource_group_name=${{ secrets.TFSTATE_RG }}" -backend-config="storage_account_name=${{ secrets.TFSTATE_SA }}" -backend-config="container_name=tfstate" -backend-config="key=minigpt.tfstate"
+      - run: terraform validate
+      - uses: terraform-linters/setup-tflint@v4
+      - run: tflint --chdir=.
+      - run: |
+          pip install checkov
+          checkov -d . --compact
+      - id: plan
+        run: terraform plan -no-color -out=tfplan.out
+        continue-on-error: true
+      - uses: actions/github-script@v7
+        if: github.event_name == 'pull_request'
+        with:
+          script: |
+            const output = `#### Terraform Plan\n\`\`\`\n${{ steps.plan.outputs.stdout }}\n\`\`\``;
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output,
+            });
+      - if: steps.plan.outcome == 'failure'
+        run: exit 1
+
+  apply:
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    needs: plan
+    runs-on: ubuntu-latest
+    environment: prod
+    defaults:
+      run:
+        working-directory: infra
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+      - run: terraform init -backend-config="resource_group_name=${{ secrets.TFSTATE_RG }}" -backend-config="storage_account_name=${{ secrets.TFSTATE_SA }}" -backend-config="container_name=tfstate" -backend-config="key=minigpt.tfstate"
+      - run: terraform apply -auto-approve

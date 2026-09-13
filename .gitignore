@@ -18,5 +18,22 @@ __pycache__/
 # Claude Code settings (private)
 .claude/
 
+# Working plans / scratch notes — never committed
+.plans/
+
 # Gradio SSL certificate (auto-generated)
 .gradio/
+
+# Training runs: prepared data shards, checkpoints, metrics — regenerate, don't commit
+runs/
+
+# Local virtualenvs
+.venv/
+.venv-local/
+
+# Terraform local state / working dirs (state lives in Azure Blob, not git)
+infra/**/.terraform/
+infra/**/*.tfstate
+infra/**/*.tfstate.*
+infra/**/*.tfvars
+!infra/**/*.tfvars.example

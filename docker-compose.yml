@@ -4,7 +4,7 @@ services:
   jupyter:                      # Name of this service (can be anything)
     build:
       context: .                # Build from the current directory
-      dockerfile: Dockerfile    # Use our Dockerfile
+      dockerfile: docker/Dockerfile.notebook    # Use our Dockerfile
     platform: linux/amd64       # Force x86_64 Linux emulation (matches the Dockerfile)
     ports:
       - "8888:8888"             # "HOST_PORT:CONTAINER_PORT"

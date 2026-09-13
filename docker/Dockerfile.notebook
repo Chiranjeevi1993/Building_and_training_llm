@@ -31,4 +31,4 @@ EXPOSE 8888
 #   --no-browser       don't try to open a browser (there's no desktop in a container)
 #   --allow-root       allow running as root inside the container
 #   --NotebookApp.token=''  disable the login token for convenience
-CMD ["jupyter", "notebook", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root", "--NotebookApp.token=''"]
+CMD ["jupyter", "notebook", "--notebook-dir=notebooks", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root", "--NotebookApp.token=''"]

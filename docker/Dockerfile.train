@@ -1,0 +1,15 @@
+# CUDA training image for Azure ML GPU compute (A100 primary, T4 fallback).
+FROM nvidia/cuda:12.4.1-cudnn-runtime-ubuntu22.04
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        python3.11 python3-pip \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+COPY requirements.txt requirements-gpu.txt ./
+RUN pip install --no-cache-dir -r requirements-gpu.txt
+
+COPY minigpt/ minigpt/
+COPY configs/ configs/
+
+ENTRYPOINT ["python3", "-m", "minigpt.train"]

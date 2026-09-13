@@ -1,0 +1,29 @@
+name: gpt2_small_fineweb
+model:
+  vocab_size: 50257
+  maxlen: 512
+  embed_dim: 768
+  num_heads: 12
+  num_layers: 12
+  mlp_ratio: 4.0
+  dropout: 0.0
+data:
+  # Streams HuggingFaceFW/fineweb-edu, sample-10BT split. Requires the
+  # `datasets` package (requirements-gpu.txt) -- run inside docker/Dockerfile.train.
+  source: hf_dataset
+  file_path: HuggingFaceFW/fineweb-edu:sample-10BT
+  val_fraction: 0.001
+train:
+  batch_size: 128
+  max_steps: 20000
+  peak_lr: 6.0e-4
+  end_lr: 6.0e-5
+  warmup_frac: 0.02
+  weight_decay: 0.1
+  grad_clip: 1.0
+  compute_dtype: bfloat16
+  log_every: 20
+  eval_every: 500
+  ckpt_every: 500
+  ckpt_max_to_keep: 3
+out_dir: runs

@@ -1,0 +1,5 @@
+# GPU training extras. Install on top of requirements.txt inside the CUDA
+# training image (docker/Dockerfile.train). Pin matches the CUDA 12.x wheels.
+-r requirements.txt
+jax[cuda12]==0.6.2
+datasets==3.2.0

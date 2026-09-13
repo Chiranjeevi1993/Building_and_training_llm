@@ -5,11 +5,29 @@
 ![Flax](https://img.shields.io/badge/Flax_NNX-0.10.7-blueviolet)
 ![Docker](https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white)
 
-A personal learning project to understand the internal architecture of large language models by building one from scratch. This is not intended for production use — the goal was to deeply understand every component: tokenization, embeddings, multi-head attention, causal masking, the training loop, and autoregressive inference, by implementing each piece manually using JAX and Flax.
+A personal learning project to understand the internal architecture of large language models by building one from scratch — tokenization, embeddings, multi-head attention, causal masking, the training loop, and autoregressive inference, each implemented manually in JAX and Flax.
 
-> **Sample output:**
+> **Sample output (original 20M-param run):**
 > Prompt: `"Once upon a time a big bear"`
 > Output: `"Once upon a time a big bear. All a little boy was three years old. He was very happy and wanted to play with his friends. He was very happy and he saw a big..."`
+
+---
+
+## 🚧 Migration in progress
+
+This project is being rebuilt as a production-shaped package and deployed to Azure — Terraform-provisioned GPU training, GitHub Actions CI/CD, and a live inference endpoint. Work in progress:
+
+- **`minigpt/`** — the model, training loop, data pipeline, checkpointing, and sampling as an installable package (fixes several bugs present in the original notebooks — see below).
+- **`configs/`** — YAML configs (dev/CPU smoke, TinyStories headline run, FineWeb-Edu run), replacing three previously-conflicting hyperparameter sets scattered across `helper.py`, `train.ipynb`, and this README.
+- **`serve/`** — a FastAPI + Gradio inference app.
+- **`infra/`** — Terraform for Azure ML compute, Container Apps, and storage.
+- **`.github/workflows/`** — CI, Terraform plan/apply, training job submission, deploy, and teardown.
+- **`tests/`** — a pytest suite, including a causal-masking regression test and a CPU smoke-train that asserts loss decreases before any GPU job is allowed to run.
+- **`notebooks/`** — the original four notebooks and `helper.py`, kept as the from-scratch learning narrative.
+
+Bugs found and fixed during the rewrite (see `minigpt/model.py`, `minigpt/sample.py`): the original `TransformerBlock` had no MLP sublayer or LayerNorm despite computing (and discarding) a `feed_forward_dim`; the loss was averaged over padding tokens; and `generate_text` sampled via `argmax` even though it accepted a `temperature` argument, making that argument dead code.
+
+This section will be replaced with real results, loss curves, and a live demo link once training completes.
 
 ---
 

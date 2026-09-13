@@ -1,0 +1,28 @@
+name: gpt2_small_tinystories
+model:
+  vocab_size: 50257
+  maxlen: 512
+  embed_dim: 768
+  num_heads: 12
+  num_layers: 12
+  mlp_ratio: 4.0
+  dropout: 0.0
+data:
+  source: local_file
+  file_path: TinyStories-1000.txt   # swap for the full TinyStories corpus before the real run
+  max_stories: null
+  val_fraction: 0.005
+train:
+  batch_size: 64
+  num_epochs: 5
+  peak_lr: 6.0e-4
+  end_lr: 1.0e-5
+  warmup_frac: 0.1
+  weight_decay: 0.1
+  grad_clip: 1.0
+  compute_dtype: bfloat16   # A100 primary target; set to float16 for the T4 fallback
+  log_every: 20
+  eval_every: 200
+  ckpt_every: 200
+  ckpt_max_to_keep: 3
+out_dir: runs
