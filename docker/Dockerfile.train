@@ -11,5 +11,8 @@ RUN pip install --no-cache-dir -r requirements-gpu.txt
 
 COPY minigpt/ minigpt/
 COPY configs/ configs/
+COPY TinyStories-1000.txt ./
 
-ENTRYPOINT ["python3", "-m", "minigpt.train"]
+# No ENTRYPOINT/CMD: the Azure ML job supplies the full invocation via its
+# `command` field (prepare, then train — see .github/workflows/train.yml),
+# which is the standard AML pattern and lets one image serve every config.

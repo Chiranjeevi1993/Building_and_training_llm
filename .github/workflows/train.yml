@@ -57,5 +57,5 @@ jobs:
             --name "${{ inputs.run_name }}-${{ github.run_number }}" \
             --set compute="azureml:${{ inputs.cluster }}" \
                   environment.image="${{ secrets.ACR_NAME }}.azurecr.io/minigpt-train:${{ github.sha }}" \
-                  command="python3 -m minigpt.train --config ${{ inputs.config }}" \
+                  command="python3 -m minigpt.data.prepare --config ${{ inputs.config }} && python3 -m minigpt.train --config ${{ inputs.config }}" \
             --stream
