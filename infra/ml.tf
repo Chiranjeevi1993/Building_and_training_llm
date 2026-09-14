@@ -1,4 +1,8 @@
 resource "azurerm_machine_learning_workspace" "main" {
+  # checkov:skip=CKV2_AZURE_50:public network access is required here -- GitHub-hosted
+  # runners submit jobs to this workspace and a private endpoint/VNet is disproportionate
+  # cost/complexity for this project's size.
+  # checkov:skip=CKV_AZURE_144:same reasoning -- public access is required, no VNet here
   name                    = "mlw-${local.name_prefix}"
   resource_group_name     = azurerm_resource_group.main.name
   location                = azurerm_resource_group.main.location
@@ -51,6 +55,9 @@ locals {
 }
 
 resource "azurerm_machine_learning_compute_cluster" "gpu" {
+  # checkov:skip=CKV_AZURE_150:min_node_count is 0 above -- checkov's static
+  # analyzer can't resolve it through the for_each/local map indirection.
+  # checkov:skip=CKV_AZURE_142:local auth is needed for az ml job submission from CI
   for_each                      = local.gpu_clusters
   name                          = each.key
   location                      = azurerm_resource_group.main.location
