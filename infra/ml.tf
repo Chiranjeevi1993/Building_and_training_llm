@@ -15,17 +15,23 @@ resource "azurerm_machine_learning_workspace" "main" {
 
 # Cluster map: one place to add/remove GPU tiers. Each is min_node_count = 0
 # with a short idle scale-down so a forgotten cluster costs nothing.
+#
+# NOTE: Azure ML validates vCPU quota against a cluster's *max* node count at
+# creation time even when min_node_count = 0 (confirmed by an actual apply --
+# ClusterMinNodesExceedCoreQuota). So every GPU cluster here is gated behind a
+# flag, none apply unconditionally, and every flag must stay false until the
+# matching quota is granted (see .plans/azure-migration.md Phase 0).
 locals {
   gpu_clusters = merge(
-    {
+    var.enable_a100 ? {
       "gpu-a100" = {
-        vm_size        = "Standard_NC24ads_A100_v4" # 1x A100 80GB
+        vm_size        = "Standard_NC24ads_A100_v4" # 1x A100 80GB — smoke/sweep tier
         max_nodes      = 2
         vm_priority    = "Dedicated"
         min_node_count = 0
       }
-    },
-    var.enable_a100 ? {
+    } : {},
+    var.enable_a100_x4 ? {
       "gpu-a100-x4" = {
         vm_size        = "Standard_NC96ads_A100_v4" # 4x A100 80GB — main training cluster
         max_nodes      = 1

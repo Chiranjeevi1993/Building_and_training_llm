@@ -23,13 +23,13 @@ resource "azurerm_storage_account" "main" {
 
 resource "azurerm_storage_container" "data" {
   name                  = "data"
-  storage_account_name  = azurerm_storage_account.main.name
+  storage_account_id    = azurerm_storage_account.main.id
   container_access_type = "private"
 }
 
 resource "azurerm_storage_container" "checkpoints" {
   name                  = "checkpoints"
-  storage_account_name  = azurerm_storage_account.main.name
+  storage_account_id    = azurerm_storage_account.main.id
   container_access_type = "private"
 }
 

@@ -23,6 +23,14 @@ resource "azurerm_container_app_environment" "main" {
   location                   = azurerm_resource_group.main.location
   log_analytics_workspace_id = azurerm_log_analytics_workspace.main.id
   tags                       = local.tags
+
+  # Azure silently attaches a default "Consumption" workload profile to every
+  # environment; declaring it explicitly stops terraform plan from showing
+  # drift (add/remove) on every run.
+  workload_profile {
+    name                  = "Consumption"
+    workload_profile_type = "Consumption"
+  }
 }
 
 resource "azurerm_container_app" "serve" {
@@ -30,6 +38,7 @@ resource "azurerm_container_app" "serve" {
   resource_group_name          = azurerm_resource_group.main.name
   container_app_environment_id = azurerm_container_app_environment.main.id
   revision_mode                = "Single"
+  workload_profile_name        = "Consumption" # matches the environment's Consumption profile; avoids plan drift
   tags                         = local.tags
 
   identity {

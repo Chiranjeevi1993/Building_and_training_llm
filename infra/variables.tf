@@ -15,13 +15,19 @@ variable "environment" {
 }
 
 variable "enable_a100" {
-  description = "Create the A100 clusters. Requires NCADSA100v4 quota granted in var.location."
+  description = "Create the 1x A100 smoke/sweep cluster (gpu-a100). Requires NCADSA100v4 quota granted in var.location — Azure ML validates quota at creation even for min_node_count = 0."
+  type        = bool
+  default     = false
+}
+
+variable "enable_a100_x4" {
+  description = "Create the 4x A100 main training cluster (gpu-a100-x4). Requires NCADSA100v4 quota granted in var.location."
   type        = bool
   default     = false
 }
 
 variable "enable_t4" {
-  description = "Create the T4 fallback cluster. Flip this on if A100 quota is refused."
+  description = "Create the 4x T4 fallback cluster (gpu-t4-x4). Flip this on if A100 quota is refused."
   type        = bool
   default     = false
 }
@@ -37,6 +43,7 @@ variable "monthly_budget_usd" {
 }
 
 variable "budget_alert_emails" {
-  type    = list(string)
-  default = []
+  description = "Required non-empty — the consumption budget API rejects a notification with no contact channel at all."
+  type        = list(string)
+  default     = ["chiranjeevichary17@gmail.com"]
 }
